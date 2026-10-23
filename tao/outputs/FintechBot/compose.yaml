@@ -1,0 +1,49 @@
+name: fintechbot
+services:
+  app:
+    build: .
+    restart: unless-stopped
+    init: true
+    environment:
+      FINTECH_PUBLIC: '1'
+      PUBLIC_ORIGIN: https://${DOMAIN:?Set DOMAIN in .env}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      SSI_CONSUMER_ID: ${SSI_CONSUMER_ID:-}
+      SSI_CONSUMER_SECRET: ${SSI_CONSUMER_SECRET:-}
+      SSI_BASE_URL: ${SSI_BASE_URL:-https://fc-data.ssi.com.vn/}
+      SSI_STREAM_URL: ${SSI_STREAM_URL:-https://fc-datahub.ssi.com.vn/}
+      FINTECH_DATA_DIR: /app/data
+    volumes:
+      - bot_data:/app/data
+    expose:
+      - '8010'
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env}
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+volumes:
+  bot_data:
+  caddy_data:
+  caddy_config:

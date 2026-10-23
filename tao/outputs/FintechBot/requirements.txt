@@ -1,0 +1,9 @@
+fastapi>=0.141
+uvicorn>=0.30
+httpx>=0.27
+pandas>=2.0
+numpy>=1.24
+matplotlib>=3.9,<4
+ssi-fc-data==2.2.2
+certifi>=2024.2.2
+pytest>=8.0
